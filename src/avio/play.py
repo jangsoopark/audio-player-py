@@ -5,13 +5,12 @@ import queue
 
 class Play(threading.Thread):
 
-    def __init__(self, device, sample_rate, channels, block_size, buffer):
+    def __init__(self, device, sample_rate, channels, buffer):
         super(Play, self).__init__()
         self.event = threading.Event()
         self.device = device
         self.sample_rate = sample_rate
         self.channels = channels
-        self.block_size = block_size
         self._current_frame = 0
         self.buffer = buffer
 
@@ -24,11 +23,13 @@ class Play(threading.Thread):
             self.event.wait()
 
     def callback(self, output_data, _frames, _time, status):
-        assert _frames == self.block_size
+
         if status:
             print(status)
         try:
-            data = self.buffer.get_nowait()
+            d = self.buffer.get_nowait()
+            assert _frames == d['frames']
+            data = d['data']
         except queue.Empty as _:
             return
 
