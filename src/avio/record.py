@@ -1,6 +1,5 @@
 import sounddevice as sd
 import threading
-import queue
 
 
 class Record(threading.Thread):

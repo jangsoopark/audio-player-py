@@ -3,8 +3,6 @@ from avio import record
 from avio import play
 
 import sounddevice as sd
-import soundfile as sf
-import threading
 import queue
 
 import argparse
