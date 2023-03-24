@@ -1,4 +1,4 @@
-from avio import audio
+from network.protocols import packet
 from avio import record
 from avio import play
 
