@@ -23,7 +23,7 @@ class Play(threading.Thread):
             self.event.wait()
 
     def callback(self, output_data, _frames, _time, status):
-
+        # print(output_data.shape, output_data.dtype)
         if status:
             print(status)
         try:

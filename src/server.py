@@ -1,6 +1,5 @@
-import socketserver
-
 from network.server import handler
+import socketserver
 
 import argparse
 import logging
@@ -22,6 +21,7 @@ def main():
     with tcp_server((args.host, args.port), handler.TCPHandler) as s:
         s.allow_reuse_address = True
         s.allow_reuse_port = True
+        s.clients = {}
         s.serve_forever()
 
 

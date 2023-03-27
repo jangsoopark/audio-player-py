@@ -1,9 +1,15 @@
-import numpy as np
 from network.protocols import packet
 import socketserver
+import socket
+import numpy as np
+import queue
 
 
 class TCPHandler(socketserver.BaseRequestHandler):
+
+    def __init__(self, request, client_address, server):
+        server.clients[client_address] = request
+        super(TCPHandler, self).__init__(request, client_address, server)
 
     def setup(self):
         pass
@@ -13,8 +19,20 @@ class TCPHandler(socketserver.BaseRequestHandler):
             data = self._receive()
             if not data or data is None:
                 self._empty_packet()
-                break
+                continue
             self._packet_received(data)
+            header, body = data
+            for k, v in self.server.clients.items():
+                if (socket.inet_ntoa(header.address), header.port) == k:
+                    continue
+
+                v.send(packet.Encode.header(header.packet_id, 2, 3, header.data_size, header.address, header.port))
+                v.send(packet.Encode.body(body.frames, body.data))
+
+            # self.server.q.put_nowait({
+            #     'frames': body.frames,
+            #     'data': np.frombuffer(body.data, dtype=np.float32)
+            # })
 
     def finish(self):
         pass
