@@ -39,8 +39,12 @@ def main():
         device=args.output_device, sample_rate=args.sample_rate, channels=args.channels,
         buffer=q
     )
-    recorder.start()
-    player.start()
+    try:
+        recorder.start()
+        player.start()
+    except KeyboardInterrupt:
+        recorder.event.set()
+        player.event.set()
 
 
 if __name__ == '__main__':
