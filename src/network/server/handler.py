@@ -29,11 +29,6 @@ class TCPHandler(socketserver.BaseRequestHandler):
                 v.send(packet.Encode.header(header.packet_id, 2, 3, header.data_size, header.address, header.port))
                 v.send(packet.Encode.body(body.frames, body.data))
 
-            # self.server.q.put_nowait({
-            #     'frames': body.frames,
-            #     'data': np.frombuffer(body.data, dtype=np.float32)
-            # })
-
     def finish(self):
         pass
 

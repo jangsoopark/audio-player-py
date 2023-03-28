@@ -17,7 +17,8 @@ parser.add_argument('--threading', action='store_true', help='sequence configura
 parser.add_argument('--host', type=str, default='localhost', help='sequence configuration path')
 parser.add_argument('--port', type=int, default=12345, help='sequence configuration path')
 parser.add_argument('--input-device', type=int, default=1, help='input device (numeric ID or substring)')
-parser.add_argument('--sample-rate', type=float, default=16000, help='sampling rate of audio device')
+parser.add_argument('--sample-rate', type=float, default=44100, help='sampling rate of audio device')
+parser.add_argument('--block-size', type=int, default=2048, help='the number of frames per second')
 parser.add_argument('--channels', type=int, default=1, nargs='*', metavar='CHANNEL',
                     help='input channels to plot (default: the first)')
 args = parser.parse_args()
@@ -30,7 +31,7 @@ def main():
         q = queue.Queue()
         recorder = record.Record(
             device=args.input_device, sample_rate=args.sample_rate, channels=args.channels,
-            buffer=q
+            buffer=q, block_size=args.block_size
         )
         recorder.start()
 

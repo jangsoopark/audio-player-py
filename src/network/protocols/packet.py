@@ -3,7 +3,7 @@ import struct
 
 struct_header = struct.Struct('!4I4sI')
 
-header_size = 32
+header_size = 24
 body_size = 4
 
 
