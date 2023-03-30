@@ -4,7 +4,7 @@ import struct
 struct_header = struct.Struct('!h4I4sI')
 
 prefix = 0x1234
-header_size = 40
+header_size = 26
 body_size = 4
 
 
