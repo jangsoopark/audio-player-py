@@ -17,8 +17,8 @@ parser.add_argument('--threading', action='store_true', help='sequence configura
 parser.add_argument('--host', type=str, default='localhost', help='sequence configuration path')
 parser.add_argument('--port', type=int, default=12345, help='sequence configuration path')
 parser.add_argument('--input-device', type=int, default=1, help='input device (numeric ID or substring)')
-parser.add_argument('--sample-rate', type=float, default=44100, help='sampling rate of audio device')
-parser.add_argument('--block-size', type=int, default=2048, help='the number of frames per second')
+parser.add_argument('--sample-rate', type=float, default=16000, help='sampling rate of audio device')
+parser.add_argument('--block-size', type=int, default=1024, help='the number of frames per second')
 parser.add_argument('--channels', type=int, default=1, nargs='*', metavar='CHANNEL',
                     help='input channels to plot (default: the first)')
 args = parser.parse_args()
@@ -47,6 +47,15 @@ def main():
                 packet_id += 1
             except queue.Empty:
                 pass
+            except ConnectionAbortedError:
+                break
+            except ConnectionResetError:
+                break
+            except KeyboardInterrupt:
+                break
+
+        recorder.event.set()
+        recorder.join()
 
 
 if __name__ == '__main__':
