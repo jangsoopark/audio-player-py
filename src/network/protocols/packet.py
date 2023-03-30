@@ -1,13 +1,15 @@
 from typing import NamedTuple
 import struct
 
-struct_header = struct.Struct('!4I4sI')
+struct_header = struct.Struct('!h4I4sI')
 
-header_size = 24
+prefix = 0x1234
+header_size = 40
 body_size = 4
 
 
 class Header(NamedTuple):
+    prefix: int
     packet_id: int
     command: int
     status: int
@@ -26,7 +28,7 @@ class Encode(object):
     @staticmethod
     def header(packet_id: int, command: int, status: int, data_size: int, address: bytes, port: int) -> bytes:
         return struct_header.pack(
-            packet_id, command, status, data_size, address, port
+            prefix, packet_id, command, status, data_size, address, port
         )
 
     @staticmethod

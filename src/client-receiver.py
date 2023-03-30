@@ -39,7 +39,8 @@ def main():
             try:
                 d = s.recv(packet.header_size)
                 header = packet.Decode.header(d)
-                print(header)
+                if header.prefix != packet.prefix:
+                    continue
                 d = s.recv(packet.body_size + header.data_size)
                 body = packet.Decode.body(d)
 

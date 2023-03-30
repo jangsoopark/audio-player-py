@@ -42,6 +42,7 @@ def main():
                 data = q.get_nowait()
                 body = packet.Encode.body(data['frames'], data['data'].tobytes())
                 header = packet.Encode.header(packet_id, 2, 3, len(body), socket.inet_aton(address), port)
+                print(packet.Decode.header(header))
                 s.send(header)
                 s.send(body)
                 packet_id += 1
