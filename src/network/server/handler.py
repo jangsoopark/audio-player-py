@@ -1,8 +1,8 @@
 from network.protocols import packet
+
 import socketserver
 import socket
-import numpy as np
-import queue
+import struct
 
 
 class TCPHandler(socketserver.BaseRequestHandler):
@@ -15,17 +15,18 @@ class TCPHandler(socketserver.BaseRequestHandler):
         pass
 
     def handle(self):
+        e = None
         while True:
             data = self._receive()
             if not data or data is None:
                 self._empty_packet()
-                continue
+                break
             self._packet_received(data)
             header, body = data
+
             for k, v in self.server.clients.items():
                 if (socket.inet_ntoa(header.address), header.port) == k:
                     continue
-
                 v.send(packet.Encode.header(header.packet_id, 2, 3, header.data_size, header.address, header.port))
                 v.send(packet.Encode.body(body.frames, body.data))
 
@@ -33,15 +34,21 @@ class TCPHandler(socketserver.BaseRequestHandler):
         pass
 
     def _receive(self):
+        address, port = self.address.split(':')
         try:
             d = self.request.recv(packet.header_size)
             header = packet.Decode.header(d)
             d = self.request.recv(packet.body_size + header.data_size)
             body = packet.Decode.body(d)
             return header, body
-        except Exception as e:
+        except struct.error as e:
             print(f'{self.address} {e}')
+            del self.server.clients[(address, int(port))]
             return None
+        except ConnectionResetError as e:
+            print(f'{self.address} {e}')
+            del self.server.clients[(address, int(port))]
+        return None
 
     @property
     def address(self):

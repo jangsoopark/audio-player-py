@@ -20,8 +20,18 @@ parser.add_argument('--output-device', type=int, default=4, help='output device 
 parser.add_argument('--sample-rate', type=float, default=16000, help='sampling rate of audio device')
 parser.add_argument('--block-size', type=int, default=1024, help='the number of frames per second')
 parser.add_argument('--channels', type=int, default=1, nargs='*', metavar='CHANNEL',
-                    help='input channels to plot (default: the first)')
+                    help='output channels to plot (default: the first)')
 args = parser.parse_args()
+
+
+def restart_player(player, q, status):
+    player.event.set()
+    player.join()
+    player = play.Play(
+        device=args.output_device, sample_rate=args.sample_rate, channels=args.channels,
+        buffer=q, block_size=args.block_size, status=status
+    )
+    player.start()
 
 
 def main():
@@ -29,9 +39,10 @@ def main():
         s.connect((args.host, args.port))
         address, port = s.getsockname()
         q = queue.Queue()
+        status = queue.Queue()
         player = play.Play(
             device=args.output_device, sample_rate=args.sample_rate, channels=args.channels,
-            buffer=q, block_size=args.block_size
+            buffer=q, block_size=args.block_size, status=status
         )
         player.start()
 
@@ -43,11 +54,15 @@ def main():
                     continue
                 d = s.recv(packet.body_size + header.data_size)
                 body = packet.Decode.body(d)
-
                 q.put_nowait({
                     'frames': body.frames,
                     'data': np.frombuffer(body.data, dtype=np.int16).reshape(-1, 1)
                 })
+                if not status.empty():
+                    msg = status.get_nowait()
+                    print(msg)
+                    restart_player(player, q, status)
+
             except queue.Empty:
                 pass
             except ConnectionAbortedError:
@@ -56,6 +71,7 @@ def main():
                 break
             except KeyboardInterrupt:
                 break
+
         player.event.set()
         player.join()
 

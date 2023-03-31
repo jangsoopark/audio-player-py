@@ -42,20 +42,22 @@ def main():
                 data = q.get_nowait()
                 body = packet.Encode.body(data['frames'], data['data'].tobytes())
                 header = packet.Encode.header(packet_id, 2, 3, len(body), socket.inet_aton(address), port)
-                print(len(header))
-                print(packet.Decode.header(header))
                 s.send(header)
                 s.send(body)
                 packet_id += 1
-            except queue.Empty:
+                # print(packet.Decode.header(header))
+            except queue.Empty as e:
                 pass
-            except ConnectionAbortedError:
+            except ConnectionAbortedError as e:
+                print(e)
                 break
-            except ConnectionResetError:
+            except ConnectionResetError as e:
+                print(e)
                 break
-            except KeyboardInterrupt:
+            except KeyboardInterrupt as e:
+                print(e)
                 break
-
+            # print('fdzz')
         recorder.event.set()
         recorder.join()
 
